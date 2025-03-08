@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  projects  Project[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id        String    @id @default(uuid())
+  name      String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  campaigns Campaign[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Campaign {
+  id        String    @id @default(uuid())
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  budget    Float
+  status    CampaignStatus
+  adCopies  AdCopy[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model AdCopy {
+  id         String   @id @default(uuid())
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId String
+  platform   AdPlatform
+  text       String
+  createdAt  DateTime @default(now())
+}
+
+enum CampaignStatus {
+  DRAFT
+  RUNNING
+  COMPLETED
+  PAUSED
+}
+
+enum AdPlatform {
+  GOOGLE
+  FACEBOOK
+  LINKEDIN
+}
