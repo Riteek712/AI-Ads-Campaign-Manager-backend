@@ -28,15 +28,21 @@ model Project {
 }
 
 model Campaign {
-  id        String    @id @default(uuid())
-  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id        String   @id @default(uuid())
+  project   Project  @relation(fields: [projectId], references: [id])
   projectId String
   budget    Float
-  status    CampaignStatus
-  adCopies  AdCopy[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  status    String   @default("draft") // draft, running, paused, completed
+  targetKeywords String[]
+  startDate DateTime
+  endDate   DateTime
+  adPlatform String  @default("google") // google, facebook, linkedin
+  adPerformanceMetrics Json? // Store analytics data as JSON
+  adCopies AdCopy[]  // <-- Add this line
+  createdAt DateTime @default(now())
 }
+
+
 
 model AdCopy {
   id         String   @id @default(uuid())
