@@ -48,12 +48,16 @@ export class GoogleAdsService {
    */
   async createCampaign(name: string, budget: number) {
     try {
-      const budgetResourceName = ResourceNames.campaignBudget(this.customer.credentials.customer_id, '-1');
-
-      const operations = [
+      const budgetResourceName = ResourceNames.campaignBudget(
+        this.customer.credentials.customer_id,
+        '-1'
+      );
+  
+      const operations: any[] = [
         {
           create: {
-            campaign_budget: {
+            resource: 'campaign_budget', // Specify the correct resource type
+            entity: {
               resource_name: budgetResourceName,
               name: `${name} Budget`,
               delivery_method: enums.BudgetDeliveryMethod.STANDARD,
@@ -63,7 +67,8 @@ export class GoogleAdsService {
         },
         {
           create: {
-            campaign: {
+            resource: 'campaign', // Specify the correct resource type
+            entity: {
               name: name,
               advertising_channel_type: enums.AdvertisingChannelType.SEARCH,
               status: enums.CampaignStatus.PAUSED,
@@ -72,7 +77,7 @@ export class GoogleAdsService {
           },
         },
       ];
-
+  
       const result = await this.customer.mutateResources(operations);
       return result;
     } catch (error) {
@@ -80,4 +85,5 @@ export class GoogleAdsService {
       throw error;
     }
   }
+  
 }

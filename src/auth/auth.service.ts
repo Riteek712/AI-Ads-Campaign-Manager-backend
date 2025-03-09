@@ -1,4 +1,4 @@
-import { BadGatewayException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadGatewayException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { RegisterUserDto } from './dto/register.dto';
 import { DatabaseService } from 'src/database/database.service';
@@ -11,30 +11,40 @@ export class AuthService {
     private readonly jwtservice: JwtService
   ){}
 
-  async login(loginData: LoginDto){
-    const {email, password} = loginData;
-    console.log(email)
-    console.log(password)
+  async login(loginData: LoginDto) {
+    const { email, password } = loginData;
+  
+    console.log(email);
+    console.log(password);
+  
     const user = await this.dataservice.user.findFirst({
-      where:{
-        email: email
-      }
-    })
-    if(!user){
-      throw new NotFoundException("No user exists with the entered email")
+      where: { email }
+    });
+  
+    if (!user) {
+      throw new NotFoundException("No user exists with the entered email");
     }
-    console.log(user)
-    const validatePassword = await bcrypt.compare(password, user.password)
-    if(!validatePassword){
-      throw new NotFoundException("Wrong Password")
+  
+    // Check if user was created via Google OAuth (no password stored)
+    if (!user.password) {
+      throw new UnauthorizedException("This account is linked to Google. Please sign in with Google.");
     }
-
-    console.log(this.jwtservice.sign({email}))
+  
+    console.log(user);
+  
+    // Compare hashed password
+    const validatePassword = await bcrypt.compare(password, user.password);
+    if (!validatePassword) {
+      throw new NotFoundException("Wrong Password");
+    }
+  
+    console.log(this.jwtservice.sign({ email }));
+  
     return {
-      token: this.jwtservice.sign({email})
-    }
-
+      token: this.jwtservice.sign({ email })
+    };
   }
+  
 
   async register(registerData: RegisterUserDto) {
     const user = await this.dataservice.user.findFirst({
