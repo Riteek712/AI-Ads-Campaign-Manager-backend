@@ -5,11 +5,14 @@ import { JwtStrategy } from './jwt.strategy';
 import { DatabaseModule } from 'src/database/database.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { GoogleStrategy } from './google.strategy';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports:[
     DatabaseModule,
     PassportModule,
+    ConfigModule.forRoot(),
     JwtModule.register({
       secret: "Secret",
       signOptions:{
@@ -18,6 +21,6 @@ import { JwtModule } from '@nestjs/jwt';
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, GoogleStrategy, ],
 })
 export class AuthModule {}
