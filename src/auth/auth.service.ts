@@ -49,6 +49,50 @@ export class AuthService {
     const res = await this.dataservice.user.create({data: registerData})
     return res;
   }
+  async validateGoogleUser(profile: any, accessToken: string, refreshToken: string) {
+    let user = await this.dataservice.user.findFirst({ 
+      where: { googleId: profile.id } 
+    });
+  
+    if (!user) {
+      // Check if a user with the same email exists
+      user = await this.dataservice.user.findFirst({ where: { email: profile.emails[0].value } });
+  
+      if (user) {
+        // If user exists, update it with Google ID and tokens
+        user = await this.dataservice.user.update({
+          where: { email: profile.emails[0].value },
+          data: { googleId: profile.id, accessToken, refreshToken }
+        });
+      } else {
+        // Create a new user
+        user = await this.dataservice.user.create({
+          data: {
+            email: profile.emails[0].value,
+            name: profile.displayName,
+            googleId: profile.id,
+            accessToken,
+            refreshToken,
+          }
+        });
+      }
+    }
+  
+    return user;
+  }
+  
+
+  async getGoogleAdsCustomerId(accessToken: string): Promise<string> {
+    const response = await fetch('https://googleads.googleapis.com/v12/customers:listAccessibleCustomers', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const data = await response.json();
+    return data.resourceNames?.[0]?.split('/')[1] || null;
+  }
+
+  generateJwtToken(user: any, customerId: string): string {
+    return this.jwtservice.sign({ email: user.email, customerId });
+  }
 
   
 }
