@@ -9,9 +9,9 @@ async function bootstrap() {
 
 
   app.enableCors({
-    origin: 'http://localhost:5173', // Replace with your frontend's origin
+    origin: '*', // Allow all origins (for testing)
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true, // If you need to send cookies with the request
+    credentials: true,
   });
   app.useGlobalPipes(new ValidationPipe())
   const config = new DocumentBuilder()

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNumber, IsUUID, IsDate, IsArray, IsEnum, IsOptional } from 'class-validator';
 import { CampaignStatus } from '@prisma/client'; // Import from Prisma
+import { Type } from 'class-transformer';
 
 export class CreateCampaignDto {
   @ApiProperty({ example: 'project-id-123', description: 'ID of the project' })
@@ -20,10 +21,12 @@ export class CreateCampaignDto {
   targetKeywords: string[];
 
   @ApiProperty({ example: '2024-05-01', description: 'Start date' })
+  @Type(() => Date)
   @IsDate()
   startDate: Date;
 
   @ApiProperty({ example: '2024-06-01', description: 'End date' })
+  @Type(() => Date)
   @IsDate()
   endDate: Date;
 

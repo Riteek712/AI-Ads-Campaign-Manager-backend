@@ -8,19 +8,26 @@ export class CampaignService {
   constructor(private readonly prisma: DatabaseService) {}
 
   async create(createCampaignDto: CreateCampaignDto, email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email }, include: { projects: true } });
+    const user = await this.prisma.user.findUnique({ 
+      where: { email }, 
+      include: { projects: true } 
+    });
+  
     if (!user) throw new NotFoundException('User not found');
-
+  
     const project = user.projects.find(p => p.id === createCampaignDto.projectId);
     if (!project) throw new ForbiddenException('Access denied');
-
+  
     return this.prisma.campaign.create({
       data: {
         ...createCampaignDto,
         projectId: project.id,
+        startDate: new Date(createCampaignDto.startDate), // Convert to Date
+        endDate: new Date(createCampaignDto.endDate), // Convert to Date
       },
     });
   }
+  
 
   async findAll(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email }, include: { projects: { include: { campaigns: true } } } });
